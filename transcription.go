@@ -73,7 +73,7 @@ func (r *TranscriptionRequest) Validate() error {
 }
 
 // CreateTranscription は音声ファイルの書き起こしを行います
-func (c *SakuraClient) CreateTranscription(ctx context.Context, req *TranscriptionRequest) (*TranscriptionResponse, error) {
+func (c *Client) CreateTranscription(ctx context.Context, req *TranscriptionRequest) (*TranscriptionResponse, error) {
 	url := fmt.Sprintf("%s/v1/audio/transcriptions", c.baseURL)
 
 	// ファイルを開く

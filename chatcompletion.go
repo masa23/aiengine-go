@@ -270,7 +270,7 @@ type ChatCompletionResponse struct {
 //
 //	*ChatCompletionResponse: The chat completion response
 //	error: An error if the request fails
-func (c *SakuraClient) CreateChatCompletion(ctx context.Context, req *ChatCompletionRequest) (*ChatCompletionResponse, error) {
+func (c *Client) CreateChatCompletion(ctx context.Context, req *ChatCompletionRequest) (*ChatCompletionResponse, error) {
 	// Validate the request
 	if err := req.Validate(); err != nil {
 		return nil, fmt.Errorf("request validation failed: %w", err)

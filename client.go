@@ -5,9 +5,9 @@
 //
 // Basic usage:
 //
-//	client := aiengine.NewSakuraClient("your-api-key")
+//	client := aiengine.NewClient("your-api-key")
 //	// Or create from environment variables
-//	client, err := aiengine.NewSakuraClientFromEnv()
+//	client, err := aiengine.NewClientFromEnv()
 //
 // For chat completions:
 //
@@ -83,9 +83,9 @@ func (e *ValidationError) Error() string {
 	return fmt.Sprintf("validation error on field '%s': %s", e.Field, e.Message)
 }
 
-// SakuraClient is the client for the Sakura AI Engine API.
+// Client is the client for the Sakura AI Engine API.
 // It handles authentication, HTTP requests, and response processing for all API operations.
-type SakuraClient struct {
+type Client struct {
 	// apiKey is the API key used for authentication
 	apiKey string
 	// baseURL is the base URL for the API endpoints
@@ -100,26 +100,26 @@ type SakuraClient struct {
 	retryBackoff time.Duration
 }
 
-// ClientOption is a function that configures a SakuraClient.
-type ClientOption func(*SakuraClient)
+// ClientOption is a function that configures a Client.
+type ClientOption func(*Client)
 
 // WithBaseURL sets the base URL for the client.
 func WithBaseURL(baseURL string) ClientOption {
-	return func(c *SakuraClient) {
+	return func(c *Client) {
 		c.baseURL = baseURL
 	}
 }
 
-// WithHTTPClient sets the HTTP client for the SakuraClient.
+// WithHTTPClient sets the HTTP client for the Client.
 func WithHTTPClient(httpClient *http.Client) ClientOption {
-	return func(c *SakuraClient) {
+	return func(c *Client) {
 		c.httpClient = httpClient
 	}
 }
 
 // WithTimeout sets the timeout for the HTTP client.
 func WithTimeout(timeout time.Duration) ClientOption {
-	return func(c *SakuraClient) {
+	return func(c *Client) {
 		if c.httpClient == nil {
 			c.httpClient = &http.Client{}
 		}
@@ -129,19 +129,19 @@ func WithTimeout(timeout time.Duration) ClientOption {
 
 // WithMaxRetries sets the maximum number of retries for failed requests.
 func WithMaxRetries(maxRetries int) ClientOption {
-	return func(c *SakuraClient) {
+	return func(c *Client) {
 		c.maxRetries = maxRetries
 	}
 }
 
 // WithRetryBackoff sets the base backoff duration for retries.
 func WithRetryBackoff(backoff time.Duration) ClientOption {
-	return func(c *SakuraClient) {
+	return func(c *Client) {
 		c.retryBackoff = backoff
 	}
 }
 
-// NewSakuraClient creates a new SakuraClient instance with the provided API key and options.
+// NewClient creates a new Client instance with the provided API key and options.
 // The client will use the default base URL (https://api.ai.sakura.ad.jp) and
 // an HTTP client with a 60-second timeout if no options are provided.
 //
@@ -151,9 +151,9 @@ func WithRetryBackoff(backoff time.Duration) ClientOption {
 //
 // Returns:
 //
-//	*SakuraClient: A new SakuraClient instance
-func NewSakuraClient(apiKey string, opts ...ClientOption) *SakuraClient {
-	c := &SakuraClient{
+//	*Client: A new Client instance
+func NewClient(apiKey string, opts ...ClientOption) *Client {
+	c := &Client{
 		apiKey:       apiKey,
 		baseURL:      "https://api.ai.sakura.ad.jp",
 		httpClient:   &http.Client{Timeout: 60 * time.Second},
@@ -176,7 +176,7 @@ func NewSakuraClient(apiKey string, opts ...ClientOption) *SakuraClient {
 	return c
 }
 
-// NewSakuraClientFromEnv creates a client using environment variables.
+// NewClientFromEnv creates a client using environment variables.
 // This function reads the API key and optional base URL from environment variables.
 //
 // Environment Variables:
@@ -185,16 +185,16 @@ func NewSakuraClient(apiKey string, opts ...ClientOption) *SakuraClient {
 //
 // Returns:
 //
-//	*SakuraClient: A new SakuraClient instance
+//	*Client: A new Client instance
 //	error: An error if the required API key environment variable is not set
-func NewSakuraClientFromEnv(opts ...ClientOption) (*SakuraClient, error) {
+func NewClientFromEnv(opts ...ClientOption) (*Client, error) {
 	apiKey := os.Getenv("SAKURA_AI_ENGINE_API_KEY")
 	if apiKey == "" {
 		return nil, fmt.Errorf("SAKURA_AI_ENGINE_API_KEY is not set")
 	}
 
 	// Create client with options
-	c := NewSakuraClient(apiKey, opts...)
+	c := NewClient(apiKey, opts...)
 
 	// Override base URL if set in environment
 	if base := os.Getenv("SAKURA_AI_ENGINE_BASE_URL"); base != "" {
@@ -209,17 +209,17 @@ func NewSakuraClientFromEnv(opts ...ClientOption) (*SakuraClient, error) {
 //
 // Parameters:
 //   - req: The HTTP request to set the authorization header on
-func (c *SakuraClient) setAuthorizationHeader(req *http.Request) {
+func (c *Client) setAuthorizationHeader(req *http.Request) {
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.apiKey))
 }
 
 // setUserAgentHeader sets the User-Agent header on the request.
-func (c *SakuraClient) setUserAgentHeader(req *http.Request) {
+func (c *Client) setUserAgentHeader(req *http.Request) {
 	req.Header.Set("User-Agent", c.userAgent)
 }
 
 // shouldRetry determines if a request should be retried based on the response status code.
-func (c *SakuraClient) shouldRetry(statusCode int) bool {
+func (c *Client) shouldRetry(statusCode int) bool {
 	switch statusCode {
 	case 429, 503, 504: // Too Many Requests, Service Unavailable, Gateway Timeout
 		return true
@@ -229,7 +229,7 @@ func (c *SakuraClient) shouldRetry(statusCode int) bool {
 }
 
 // parseRetryAfter parses the Retry-After header value and returns the duration.
-func (c *SakuraClient) parseRetryAfter(retryAfter string) time.Duration {
+func (c *Client) parseRetryAfter(retryAfter string) time.Duration {
 	// First try to parse as integer (seconds)
 	if seconds, err := strconv.Atoi(strings.TrimSpace(retryAfter)); err == nil {
 		return time.Duration(seconds) * time.Second
@@ -255,7 +255,7 @@ func (c *SakuraClient) parseRetryAfter(retryAfter string) time.Duration {
 //
 //	[]byte: The response body as bytes
 //	error: An error if the request fails or the response indicates an error
-func (c *SakuraClient) doRequest(req *http.Request) ([]byte, error) {
+func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 	c.setAuthorizationHeader(req)
 	c.setUserAgentHeader(req)
 
@@ -380,7 +380,7 @@ func (c *SakuraClient) doRequest(req *http.Request) ([]byte, error) {
 //
 //	[]DocumentList: A slice of DocumentList items matching the name
 //	error: An error if the request fails
-func (c *SakuraClient) FindDocumentsByName(ctx context.Context, name string) ([]DocumentList, error) {
+func (c *Client) FindDocumentsByName(ctx context.Context, name string) ([]DocumentList, error) {
 	list, err := c.ListDocuments(ctx, "", name, "", 0, 0)
 	if err != nil {
 		return nil, err
@@ -399,7 +399,7 @@ func (c *SakuraClient) FindDocumentsByName(ctx context.Context, name string) ([]
 // Returns:
 //
 //	error: An error if finding the documents fails, nil otherwise (individual deletion errors are logged)
-func (c *SakuraClient) DeleteDocumentsByName(ctx context.Context, name string) error {
+func (c *Client) DeleteDocumentsByName(ctx context.Context, name string) error {
 	documents, err := c.FindDocumentsByName(ctx, name)
 	if err != nil {
 		return err

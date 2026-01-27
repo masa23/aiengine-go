@@ -7,64 +7,64 @@ import (
 	"time"
 )
 
-func TestNewSakuraClientFromEnv_NotSet(t *testing.T) {
+func TestNewClientFromEnv_NotSet(t *testing.T) {
 	// Ensure it errors when the env var isn't set.
 	t.Setenv("SAKURA_AI_ENGINE_API_KEY", "")
-	_, err := NewSakuraClientFromEnv()
+	_, err := NewClientFromEnv()
 	if err == nil {
 		t.Fatalf("expected error when SAKURA_AI_ENGINE_API_KEY is not set")
 	}
 }
 
-func TestNewSakuraClient_DefaultBaseURL(t *testing.T) {
-	c := NewSakuraClient("dummy")
+func TestNewClient_DefaultBaseURL(t *testing.T) {
+	c := NewClient("dummy")
 	if c.baseURL != "https://api.ai.sakura.ad.jp" {
 		t.Fatalf("unexpected baseURL: %s", c.baseURL)
 	}
 }
 
-func TestNewSakuraClient_InvalidAPIKey(t *testing.T) {
+func TestNewClient_InvalidAPIKey(t *testing.T) {
 	// Test with an invalid API key to ensure proper error handling.
-	c := NewSakuraClient("invalid-api-key")
+	c := NewClient("invalid-api-key")
 	if c.apiKey != "invalid-api-key" {
 		t.Fatalf("unexpected apiKey: %s", c.apiKey)
 	}
 }
 
-func TestNewSakuraClient_WithOptions(t *testing.T) {
+func TestNewClient_WithOptions(t *testing.T) {
 	// Test WithBaseURL option
-	c := NewSakuraClient("test-key", WithBaseURL("https://custom.api.example.com"))
+	c := NewClient("test-key", WithBaseURL("https://custom.api.example.com"))
 	if c.baseURL != "https://custom.api.example.com" {
 		t.Fatalf("unexpected baseURL: %s", c.baseURL)
 	}
 
 	// Test WithTimeout option
-	c = NewSakuraClient("test-key", WithTimeout(30*time.Second))
+	c = NewClient("test-key", WithTimeout(30*time.Second))
 	if c.httpClient.Timeout != 30*time.Second {
 		t.Fatalf("unexpected timeout: %v", c.httpClient.Timeout)
 	}
 
 	// Test WithHTTPClient option
 	customClient := &http.Client{Timeout: 10 * time.Second}
-	c = NewSakuraClient("test-key", WithHTTPClient(customClient))
+	c = NewClient("test-key", WithHTTPClient(customClient))
 	if c.httpClient != customClient {
 		t.Fatalf("unexpected httpClient: %v", c.httpClient)
 	}
 
 	// Test WithMaxRetries option
-	c = NewSakuraClient("test-key", WithMaxRetries(5))
+	c = NewClient("test-key", WithMaxRetries(5))
 	if c.maxRetries != 5 {
 		t.Fatalf("unexpected maxRetries: %d", c.maxRetries)
 	}
 
 	// Test WithRetryBackoff option
-	c = NewSakuraClient("test-key", WithRetryBackoff(2*time.Second))
+	c = NewClient("test-key", WithRetryBackoff(2*time.Second))
 	if c.retryBackoff != 2*time.Second {
 		t.Fatalf("unexpected retryBackoff: %v", c.retryBackoff)
 	}
 
 	// Test multiple options together
-	c = NewSakuraClient("test-key",
+	c = NewClient("test-key",
 		WithBaseURL("https://custom.api.example.com"),
 		WithTimeout(30*time.Second),
 		WithMaxRetries(5))
@@ -113,8 +113,8 @@ func TestChatCompletionRequest_LongMessage(t *testing.T) {
 	}
 }
 
-// MockSakuraClient is a mock implementation of SakuraClient for testing.
-type MockSakuraClient struct {
+// MockClient is a mock implementation of Client for testing.
+type MockClient struct {
 	ChatCompletionResponse *ChatCompletionResponse
 	EmbeddingResponse      *EmbeddingResponse
 	TranscriptionResponse  *TranscriptionResponse
@@ -122,35 +122,35 @@ type MockSakuraClient struct {
 	Error                  error
 }
 
-func (m *MockSakuraClient) CreateChatCompletion(ctx context.Context, req *ChatCompletionRequest) (*ChatCompletionResponse, error) {
+func (m *MockClient) CreateChatCompletion(ctx context.Context, req *ChatCompletionRequest) (*ChatCompletionResponse, error) {
 	if m.Error != nil {
 		return nil, m.Error
 	}
 	return m.ChatCompletionResponse, nil
 }
 
-func (m *MockSakuraClient) CreateEmbeddings(ctx context.Context, req *EmbeddingRequest) (*EmbeddingResponse, error) {
+func (m *MockClient) CreateEmbeddings(ctx context.Context, req *EmbeddingRequest) (*EmbeddingResponse, error) {
 	if m.Error != nil {
 		return nil, m.Error
 	}
 	return m.EmbeddingResponse, nil
 }
 
-func (m *MockSakuraClient) CreateTranscription(ctx context.Context, req *TranscriptionRequest) (*TranscriptionResponse, error) {
+func (m *MockClient) CreateTranscription(ctx context.Context, req *TranscriptionRequest) (*TranscriptionResponse, error) {
 	if m.Error != nil {
 		return nil, m.Error
 	}
 	return m.TranscriptionResponse, nil
 }
 
-func (m *MockSakuraClient) ChatWithDocuments(ctx context.Context, req *ChatRequest) (*ChatResult, error) {
+func (m *MockClient) ChatWithDocuments(ctx context.Context, req *ChatRequest) (*ChatResult, error) {
 	if m.Error != nil {
 		return nil, m.Error
 	}
 	return m.ChatResult, nil
 }
 
-func TestMockSakuraClient_CreateChatCompletion(t *testing.T) {
+func TestMockClient_CreateChatCompletion(t *testing.T) {
 	expectedResp := &ChatCompletionResponse{
 		ID: "test-id",
 		Choices: []struct {
@@ -159,7 +159,7 @@ func TestMockSakuraClient_CreateChatCompletion(t *testing.T) {
 			FinishReason string                              `json:"finish_reason"`
 		}{{Message: ChatCompletionResponseChoiceMessage{Role: ChatCompletionMessageRoleTypeAssistant, Content: "test response"}}},
 	}
-	mockClient := &MockSakuraClient{
+	mockClient := &MockClient{
 		ChatCompletionResponse: expectedResp,
 	}
 
@@ -215,7 +215,7 @@ func TestDoRequest_ErrorHandling(t *testing.T) {
 }
 
 func TestShouldRetry(t *testing.T) {
-	c := NewSakuraClient("test-key")
+	c := NewClient("test-key")
 
 	// Test cases that should retry
 	retryCodes := []int{429, 503, 504}
@@ -235,7 +235,7 @@ func TestShouldRetry(t *testing.T) {
 }
 
 func TestParseRetryAfter(t *testing.T) {
-	c := NewSakuraClient("test-key")
+	c := NewClient("test-key")
 
 	// Test integer format
 	duration := c.parseRetryAfter("120")

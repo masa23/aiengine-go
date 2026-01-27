@@ -131,7 +131,7 @@ func (r *EmbeddingRequest) Validate() error {
 //
 //	*EmbeddingResponse: The embedding response
 //	error: An error if the request fails
-func (c *SakuraClient) CreateEmbeddings(ctx context.Context, req *EmbeddingRequest) (*EmbeddingResponse, error) {
+func (c *Client) CreateEmbeddings(ctx context.Context, req *EmbeddingRequest) (*EmbeddingResponse, error) {
 	url := fmt.Sprintf("%s/v1/embeddings", c.baseURL)
 
 	body, err := json.Marshal(req)

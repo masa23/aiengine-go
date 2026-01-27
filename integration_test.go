@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func integrationClientOrSkip(t *testing.T) *SakuraClient {
+func integrationClientOrSkip(t *testing.T) *Client {
 	t.Helper()
 
 	apiKey := os.Getenv("SAKURA_AI_ENGINE_API_KEY")
@@ -18,7 +18,7 @@ func integrationClientOrSkip(t *testing.T) *SakuraClient {
 	}
 
 	// Create client with options for better reliability
-	c := NewSakuraClient(apiKey,
+	c := NewClient(apiKey,
 		WithMaxRetries(3),
 		WithRetryBackoff(1*time.Second))
 
