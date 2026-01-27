@@ -21,13 +21,13 @@ go get github.com/masa23/aiengine-go
 ```go
 import "github.com/masa23/aiengine-go"
 
-client := aiengine.NewSakuraClient("your-api-key")
+client := aiengine.NewClient("your-api-key")
 ```
 
 または、オプションを使用して初期化:
 
 ```go
-client := aiengine.NewSakuraClient("your-api-key",
+client := aiengine.NewClient("your-api-key",
     aiengine.WithBaseURL("https://custom.api.example.com"),
     aiengine.WithTimeout(30*time.Second),
     aiengine.WithMaxRetries(5))
@@ -36,7 +36,7 @@ client := aiengine.NewSakuraClient("your-api-key",
 または、環境変数から初期化:
 
 ```go
-client, err := aiengine.NewSakuraClientFromEnv()
+client, err := aiengine.NewClientFromEnv()
 if err != nil {
     log.Fatal(err)
 }
@@ -45,7 +45,7 @@ if err != nil {
 または、オプション付きで環境変数から初期化:
 
 ```go
-client, err := aiengine.NewSakuraClientFromEnv(
+client, err := aiengine.NewClientFromEnv(
     aiengine.WithTimeout(30*time.Second),
     aiengine.WithMaxRetries(5))
 if err != nil {

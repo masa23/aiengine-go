@@ -294,7 +294,7 @@ type QueryResultChunkList struct {
 //
 //	*PaginatedDocumentList: The paginated list of documents
 //	error: An error if the request fails
-func (c *SakuraClient) ListDocuments(ctx context.Context, model, name, tag string, page, pageSize int) (*PaginatedDocumentList, error) {
+func (c *Client) ListDocuments(ctx context.Context, model, name, tag string, page, pageSize int) (*PaginatedDocumentList, error) {
 	url := fmt.Sprintf("%s/v1/documents/", c.baseURL)
 
 	// Build query parameters
@@ -346,7 +346,7 @@ func (c *SakuraClient) ListDocuments(ctx context.Context, model, name, tag strin
 // Returns:
 //   - *Document: The retrieved document
 //   - error: An error if the request fails
-func (c *SakuraClient) GetDocument(ctx context.Context, id string) (*Document, error) {
+func (c *Client) GetDocument(ctx context.Context, id string) (*Document, error) {
 	url := fmt.Sprintf("%s/v1/documents/%s/", c.baseURL, id)
 
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -378,7 +378,7 @@ func (c *SakuraClient) GetDocument(ctx context.Context, id string) (*Document, e
 // Returns:
 //   - *Document: The updated document
 //   - error: An error if the request fails
-func (c *SakuraClient) UpdateDocument(ctx context.Context, id string, doc *Document) (*Document, error) {
+func (c *Client) UpdateDocument(ctx context.Context, id string, doc *Document) (*Document, error) {
 	url := fmt.Sprintf("%s/v1/documents/%s/", c.baseURL, id)
 
 	body, err := json.Marshal(doc)
@@ -414,7 +414,7 @@ func (c *SakuraClient) UpdateDocument(ctx context.Context, id string, doc *Docum
 //
 // Returns:
 //   - error: An error if the request fails
-func (c *SakuraClient) DeleteDocument(ctx context.Context, id string) error {
+func (c *Client) DeleteDocument(ctx context.Context, id string) error {
 	url := fmt.Sprintf("%s/v1/documents/%s/", c.baseURL, id)
 
 	httpReq, err := http.NewRequestWithContext(ctx, "DELETE", url, nil)
@@ -442,7 +442,7 @@ func (c *SakuraClient) DeleteDocument(ctx context.Context, id string) error {
 // Returns:
 //   - *PaginatedDocumentChunkList: The paginated list of document chunks
 //   - error: An error if the request fails
-func (c *SakuraClient) ListDocumentChunks(ctx context.Context, documentID string, page, pageSize int) (*PaginatedDocumentChunkList, error) {
+func (c *Client) ListDocumentChunks(ctx context.Context, documentID string, page, pageSize int) (*PaginatedDocumentChunkList, error) {
 	url := fmt.Sprintf("%s/v1/documents/%s/chunks/", c.baseURL, documentID)
 
 	// クエリパラメータを構築
@@ -489,7 +489,7 @@ func (c *SakuraClient) ListDocumentChunks(ctx context.Context, documentID string
 // Returns:
 //   - *DocumentChunk: The retrieved document chunk
 //   - error: An error if the request fails
-func (c *SakuraClient) GetDocumentChunk(ctx context.Context, documentID string, index int) (*DocumentChunk, error) {
+func (c *Client) GetDocumentChunk(ctx context.Context, documentID string, index int) (*DocumentChunk, error) {
 	url := fmt.Sprintf("%s/v1/documents/%s/chunks/%d/", c.baseURL, documentID, index)
 
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -511,7 +511,7 @@ func (c *SakuraClient) GetDocumentChunk(ctx context.Context, documentID string, 
 }
 
 // UploadDocument はドキュメントをアップロードします
-func (c *SakuraClient) UploadDocument(ctx context.Context, uploadReq *DocumentUpload) (*DocumentUpload, error) {
+func (c *Client) UploadDocument(ctx context.Context, uploadReq *DocumentUpload) (*DocumentUpload, error) {
 	url := fmt.Sprintf("%s/v1/documents/upload/", c.baseURL)
 
 	// マルチパートフォームを作成
@@ -580,7 +580,7 @@ func (c *SakuraClient) UploadDocument(ctx context.Context, uploadReq *DocumentUp
 }
 
 // QueryDocuments はドキュメントをクエリします
-func (c *SakuraClient) QueryDocuments(ctx context.Context, queryReq *QueryRequest) (*QueryResultChunkList, error) {
+func (c *Client) QueryDocuments(ctx context.Context, queryReq *QueryRequest) (*QueryResultChunkList, error) {
 	url := fmt.Sprintf("%s/v1/documents/query/", c.baseURL)
 
 	body, err := json.Marshal(queryReq)
@@ -608,7 +608,7 @@ func (c *SakuraClient) QueryDocuments(ctx context.Context, queryReq *QueryReques
 }
 
 // ChatWithDocuments はドキュメントとチャットします
-func (c *SakuraClient) ChatWithDocuments(ctx context.Context, chatReq *ChatRequest) (*ChatResult, error) {
+func (c *Client) ChatWithDocuments(ctx context.Context, chatReq *ChatRequest) (*ChatResult, error) {
 	url := fmt.Sprintf("%s/v1/documents/chat/", c.baseURL)
 
 	body, err := json.Marshal(chatReq)
