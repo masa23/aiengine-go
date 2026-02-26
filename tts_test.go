@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestTtsAudioQueryRequest_EmptyText(t *testing.T) {
@@ -275,13 +276,16 @@ func TestIntegration_CreateAudioQuery(t *testing.T) {
 		t.Skip("SAKURA_AI_ENGINE_API_KEY not set, skipping integration test")
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
 	client := NewClient(apiKey)
 	req := &TtsAudioQueryRequest{
 		Text:    "こんにちは。",
 		Speaker: 3,
 	}
 
-	query, err := client.CreateAudioQuery(context.Background(), req)
+	query, err := client.CreateAudioQuery(ctx, req)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -297,6 +301,9 @@ func TestIntegration_SynthesizeTtsSpeech(t *testing.T) {
 		t.Skip("SAKURA_AI_ENGINE_API_KEY not set, skipping integration test")
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
 	client := NewClient(apiKey)
 
 	// First create an audio query
@@ -304,7 +311,7 @@ func TestIntegration_SynthesizeTtsSpeech(t *testing.T) {
 		Text:    "こんにちは。",
 		Speaker: 3,
 	}
-	query, err := client.CreateAudioQuery(context.Background(), queryReq)
+	query, err := client.CreateAudioQuery(ctx, queryReq)
 	if err != nil {
 		t.Fatalf("unexpected error creating audio query: %v", err)
 	}
@@ -314,7 +321,7 @@ func TestIntegration_SynthesizeTtsSpeech(t *testing.T) {
 		Speaker: 3,
 		Query:   query,
 	}
-	audioData, err := client.SynthesizeTtsSpeech(context.Background(), synthesisReq)
+	audioData, err := client.SynthesizeTtsSpeech(ctx, synthesisReq)
 	if err != nil {
 		t.Fatalf("unexpected error synthesizing speech: %v", err)
 	}
@@ -330,6 +337,9 @@ func TestIntegration_CreateSpeech(t *testing.T) {
 		t.Skip("SAKURA_AI_ENGINE_API_KEY not set, skipping integration test")
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
 	client := NewClient(apiKey)
 	req := &SpeechRequest{
 		Model: "zundamon",
@@ -337,7 +347,7 @@ func TestIntegration_CreateSpeech(t *testing.T) {
 		Input: "こんにちは。",
 	}
 
-	audioData, err := client.CreateSpeech(context.Background(), req)
+	audioData, err := client.CreateSpeech(ctx, req)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -356,6 +366,9 @@ func TestIntegration_CreateSpeech_WithWhisperVerification(t *testing.T) {
 	// Use longer text for better transcription
 	testText := "こんにちは、これはテキスト読み上げのテストです。よろしくお願いします。"
 
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
 	client := NewClient(apiKey)
 
 	// Step 1: Generate speech
@@ -365,7 +378,7 @@ func TestIntegration_CreateSpeech_WithWhisperVerification(t *testing.T) {
 		Input: testText,
 	}
 
-	audioData, err := client.CreateSpeech(context.Background(), req)
+	audioData, err := client.CreateSpeech(ctx, req)
 	if err != nil {
 		t.Fatalf("unexpected error creating speech: %v", err)
 	}

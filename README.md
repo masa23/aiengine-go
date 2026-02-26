@@ -186,7 +186,7 @@ query.VolumeScale = 1.0     // 音量
 
 // ステップ3: 音声を合成
 synthesisReq := &aiengine.TtsSynthesisRequest{
-    Speaker: 1,
+    Speaker: 3,
     Query:   query,
 }
 
@@ -260,7 +260,7 @@ Integration tests run only when required environment variables are set.
 - `SAKURA_AI_ENGINE_EMBEDDING_MODEL`
 - `SAKURA_AI_ENGINE_RAG_EMBEDDING_MODEL`
 - `SAKURA_AI_ENGINE_AUDIO_FILE` (音声書き起こしのための音声ファイルパス)
-- `SAKURA_AI_ENGINE_TTS_SPEAKER` (TTSの話者ID、デフォルト: 3 - ずんだもん)
+- `SAKURA_AI_ENGINE_TTS_MODEL` (TTSモデル名、例: zundamon)
 
 ## テスト
 

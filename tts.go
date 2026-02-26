@@ -22,7 +22,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"unicode/utf8"
@@ -201,7 +200,7 @@ func (r *SpeechRequest) Validate() error {
 		}
 	}
 
-	if len(r.Input) < 1 || len(r.Input) > 1000 {
+	if utf8.RuneCountInString(r.Input) < 1 || utf8.RuneCountInString(r.Input) > 1000 {
 		return &ValidationError{
 			Field:   "Input",
 			Message: "input length must be between 1 and 1000 characters",
@@ -261,29 +260,10 @@ func (c *Client) CreateSpeech(ctx context.Context, req *SpeechRequest) ([]byte, 
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
 
-	// Execute request directly to handle binary response
-	c.setAuthorizationHeader(httpReq)
-	c.setUserAgentHeader(httpReq)
-
-	httpResp, err := c.httpClient.Do(httpReq)
+	// Execute request using doRequest for retry/error handling
+	audioData, err := c.doRequest(httpReq)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute request: %w", err)
-	}
-	defer httpResp.Body.Close()
-
-	if httpResp.StatusCode < 200 || httpResp.StatusCode >= 300 {
-		body, _ := io.ReadAll(httpResp.Body)
-		return nil, &APIError{
-			StatusCode: httpResp.StatusCode,
-			Message:    httpResp.Status,
-			RawBody:    body,
-		}
-	}
-
-	// Read binary audio data
-	audioData, err := io.ReadAll(httpResp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
+		return nil, err
 	}
 
 	return audioData, nil
@@ -365,29 +345,10 @@ func (c *Client) SynthesizeTtsSpeech(ctx context.Context, req *TtsSynthesisReque
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
 
-	// Execute request directly to handle binary response
-	c.setAuthorizationHeader(httpReq)
-	c.setUserAgentHeader(httpReq)
-
-	httpResp, err := c.httpClient.Do(httpReq)
+	// Execute request using doRequest for retry/error handling
+	audioData, err := c.doRequest(httpReq)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute request: %w", err)
-	}
-	defer httpResp.Body.Close()
-
-	if httpResp.StatusCode < 200 || httpResp.StatusCode >= 300 {
-		body, _ := io.ReadAll(httpResp.Body)
-		return nil, &APIError{
-			StatusCode: httpResp.StatusCode,
-			Message:    httpResp.Status,
-			RawBody:    body,
-		}
-	}
-
-	// Read binary audio data
-	audioData, err := io.ReadAll(httpResp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
+		return nil, err
 	}
 
 	return audioData, nil

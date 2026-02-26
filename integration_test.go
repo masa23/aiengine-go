@@ -119,8 +119,11 @@ func TestIntegration_Transcription(t *testing.T) {
 				t.Fatalf("Failed to create temp file: %v", err)
 			}
 			defer os.Remove(tmpFile.Name())
-			if err := os.WriteFile(tmpFile.Name(), audioData, 0644); err != nil {
+			if _, err := tmpFile.Write(audioData); err != nil {
 				t.Fatalf("Failed to write audio data: %v", err)
+			}
+			if err := tmpFile.Close(); err != nil {
+				t.Fatalf("Failed to close temp file: %v", err)
 			}
 			audioPath = tmpFile.Name()
 			t.Logf("Generated test audio file via TTS")
