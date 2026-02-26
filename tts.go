@@ -25,6 +25,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"unicode/utf8"
 )
 
 // TtsAccentPhrase represents an accent phrase in the TTS output.
@@ -94,7 +95,7 @@ func (r *TtsAudioQueryRequest) Validate() error {
 		}
 	}
 
-	if len(r.Text) < 1 || len(r.Text) > 1000 {
+	if utf8.RuneCountInString(r.Text) < 1 || utf8.RuneCountInString(r.Text) > 1000 {
 		return &ValidationError{
 			Field:   "Text",
 			Message: "text length must be between 1 and 1000 characters",
