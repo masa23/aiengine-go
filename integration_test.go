@@ -98,7 +98,40 @@ func TestIntegration_Embeddings(t *testing.T) {
 
 func TestIntegration_Transcription(t *testing.T) {
 	c := integrationClientOrSkip(t)
-	audioPath := envOrSkip(t, "SAKURA_AI_ENGINE_AUDIO_FILE")
+
+	// Try to generate audio file using TTS if possible
+	audioPath := os.Getenv("SAKURA_AI_ENGINE_AUDIO_FILE")
+	if audioPath == "" {
+		// Try to generate audio via TTS
+		ttsModel := os.Getenv("SAKURA_AI_ENGINE_TTS_MODEL")
+		if ttsModel != "" {
+			speechReq := &SpeechRequest{
+				Model: ttsModel,
+				Input: "これは音声認識のテストです。",
+			}
+			audioData, err := c.CreateSpeech(context.Background(), speechReq)
+			if err != nil {
+				t.Skipf("Failed to create speech via TTS: %v. Please set SAKURA_AI_ENGINE_AUDIO_FILE to test transcription", err)
+			}
+
+			tmpFile, err := os.CreateTemp("", "transcription_test_*.wav")
+			if err != nil {
+				t.Fatalf("Failed to create temp file: %v", err)
+			}
+			defer os.Remove(tmpFile.Name())
+			if _, err := tmpFile.Write(audioData); err != nil {
+				t.Fatalf("Failed to write audio data: %v", err)
+			}
+			if err := tmpFile.Close(); err != nil {
+				t.Fatalf("Failed to close temp file: %v", err)
+			}
+			audioPath = tmpFile.Name()
+			t.Logf("Generated test audio file via TTS")
+		} else {
+			t.Skip("SAKURA_AI_ENGINE_AUDIO_FILE not set and SAKURA_AI_ENGINE_TTS_MODEL not available for generating test audio")
+		}
+	}
+
 	model := os.Getenv("SAKURA_AI_ENGINE_TRANSCRIPTION_MODEL")
 	if model == "" {
 		model = "whisper-large-v3-turbo"
