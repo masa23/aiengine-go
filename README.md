@@ -2,7 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/masa23/aiengine-go.svg)](https://pkg.go.dev/github.com/masa23/aiengine-go)
 
-このライブラリは、さくらのAI Engine APIのGo言語用クライアントです。チャット補完、埋め込みベクトル、RAG（Retrieval-Augmented Generation）、音声書き起こしなどの機能を利用できます。
+このライブラリは、さくらのAI Engine APIのGo言語用クライアントです。チャット補完、埋め込みベクトル、RAG（Retrieval-Augmented Generation）、音声書き起こし、テキスト読み上げ（TTS）などの機能を利用できます。
 
 注意: このライブラリはさくらのAI Engine API用のクライアントです。一部のインターフェースはOpenAI APIと類似していますが、完全な互換性は保証されません。モデル名やパラメータについては、AI Engineの仕様に合わせてください。
 
@@ -142,6 +142,86 @@ if err != nil {
 fmt.Println("Transcription:", transResp.Text)
 ```
 
+### テキスト読み上げ (TTS)
+
+#### シンプルなTTS（Create Speech）
+
+```go
+speechReq := &aiengine.SpeechRequest{
+    Model: "zundamon",
+    Voice: "normal",
+    Input: "こんにちは。",
+}
+
+audioData, err := client.CreateSpeech(context.Background(), speechReq)
+if err != nil {
+    log.Fatal(err)
+}
+
+// 音声データをファイルに保存
+err = os.WriteFile("output.wav", audioData, 0644)
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+#### VOICEVOX形式のTTS（Audio Query + Synthesis）
+
+```go
+// ステップ1: 音声合成用クエリを作成
+queryReq := &aiengine.TtsAudioQueryRequest{
+    Text: "こんにちは。",
+    Speaker: 3, // さくらのAI Engineの話者ID（例: 3はずんだもん）
+}
+
+query, err := client.CreateAudioQuery(context.Background(), queryReq)
+if err != nil {
+    log.Fatal(err)
+}
+
+// ステップ2: クエリパラメータを調整（オプション）
+query.SpeedScale = 1.2      // 話速
+query.PitchScale = 0.5      // 音高
+query.VolumeScale = 1.0     // 音量
+
+// ステップ3: 音声を合成
+synthesisReq := &aiengine.TtsSynthesisRequest{
+    Speaker: 1,
+    Query:   query,
+}
+
+audioData, err := client.SynthesizeTtsSpeech(context.Background(), synthesisReq)
+if err != nil {
+    log.Fatal(err)
+}
+
+// 音声データをファイルに保存
+err = os.WriteFile("output.wav", audioData, 0644)
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+## Example プログラム
+
+### チャット (Chat)
+
+チャット補完を試すには、環境変数 `SAKURA_AI_ENGINE_API_KEY` を設定して以下を実行します:
+
+```bash
+cd example/chat
+go run main.go
+```
+
+### 音声合成 (TTS)
+
+音声合成を試すには、環境変数 `SAKURA_AI_ENGINE_API_KEY` を設定して以下を実行します:
+
+```bash
+cd example/tts
+go run main.go
+```
+
 ## クライアントオプション
 
 クライアントは以下のオプションをサポートしています:
@@ -180,6 +260,7 @@ Integration tests run only when required environment variables are set.
 - `SAKURA_AI_ENGINE_EMBEDDING_MODEL`
 - `SAKURA_AI_ENGINE_RAG_EMBEDDING_MODEL`
 - `SAKURA_AI_ENGINE_AUDIO_FILE` (音声書き起こしのための音声ファイルパス)
+- `SAKURA_AI_ENGINE_TTS_SPEAKER` (TTSの話者ID、デフォルト: 3 - ずんだもん)
 
 ## テスト
 

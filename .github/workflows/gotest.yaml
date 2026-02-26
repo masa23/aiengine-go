@@ -20,5 +20,7 @@ jobs:
       - name: test
         env:
           SAKURA_AI_ENGINE_API_KEY: ${{ secrets.SAKURA_AI_ENGINE_API_KEY }}
+          SAKURA_AI_ENGINE_CHAT_MODEL: gpt-oss-120b
+          SAKURA_AI_ENGINE_TTS_MODEL: zundamon
         run: |
           go test -v ./...
