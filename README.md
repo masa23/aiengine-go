@@ -2,11 +2,11 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/masa23/aiengine-go.svg)](https://pkg.go.dev/github.com/masa23/aiengine-go)
 
-このライブラリは、さくらのAI Engine APIのGo言語用クライアントです。チャット補完、埋め込みベクトル、RAG（Retrieval-Augmented Generation）、音声書き起こし、テキスト読み上げ（TTS）などの機能を利用できます。
+このライブラリは、[さくらのAI Engine](https://www.sakura.ad.jp/aipf/ai-engine/) APIのGo言語用クライアントです。チャット補完、埋め込みベクトル、RAG（Retrieval-Augmented Generation）、音声書き起こし、テキスト読み上げ（TTS）などの機能を利用できます。
 
-注意: このライブラリはさくらのAI Engine API用のクライアントです。一部のインターフェースはOpenAI APIと類似していますが、完全な互換性は保証されません。モデル名やパラメータについては、AI Engineの仕様に合わせてください。
-
-AI Engineを使って作成されているため、細かくは動作テストしていません。
+* [さくらのAI Engine | さくらのクラウド マニュアル](https://manual.sakura.ad.jp/cloud/manual-ai-engine.html)
+  * [チャット補完・音声文字起こし用API・音声合成](https://manual.sakura.ad.jp/api/cloud/ai-engine/inference.html)
+  * [ドキュメント・RAGAPI](https://manual.sakura.ad.jp/api/cloud/ai-engine/rag.html)
 
 ## インストール
 
