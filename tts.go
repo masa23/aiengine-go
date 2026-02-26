@@ -94,10 +94,10 @@ func (r *TtsAudioQueryRequest) Validate() error {
 		}
 	}
 
-	if utf8.RuneCountInString(r.Text) < 1 || utf8.RuneCountInString(r.Text) > 1000 {
+	if utf8.RuneCountInString(r.Text) > 1000 {
 		return &ValidationError{
 			Field:   "Text",
-			Message: "text length must be between 1 and 1000 characters",
+			Message: "text length must not exceed 1000 characters",
 		}
 	}
 
@@ -200,10 +200,10 @@ func (r *SpeechRequest) Validate() error {
 		}
 	}
 
-	if utf8.RuneCountInString(r.Input) < 1 || utf8.RuneCountInString(r.Input) > 1000 {
+	if utf8.RuneCountInString(r.Input) > 1000 {
 		return &ValidationError{
 			Field:   "Input",
-			Message: "input length must be between 1 and 1000 characters",
+			Message: "input length must not exceed 1000 characters",
 		}
 	}
 
